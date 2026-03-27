@@ -24,8 +24,10 @@ const VendorProducts = () => {
     load()
   }, [token])
 
-  const uploadImage = async (file: File) => {
-    if (!token) return
+  const uploadImage = async (file: File): Promise<string> => {
+    if (!token) {
+      throw new Error('Please log in to upload images')
+    }
     const signatureResponse = await apiRequest<{
       timestamp: number
       signature: string
@@ -47,12 +49,16 @@ const VendorProducts = () => {
       }
     )
 
-    const payload = await upload.json()
+    const payload = (await upload.json()) as { secure_url?: string; error?: { message?: string } }
     if (!upload.ok) {
       throw new Error(payload?.error?.message ?? 'Upload failed')
     }
 
-    return payload.secure_url as string
+    if (!payload.secure_url) {
+      throw new Error('Upload failed')
+    }
+
+    return payload.secure_url
   }
 
   const handleFiles = async (files: FileList | null) => {
