@@ -1,40 +1,44 @@
-const AdminOverview = () => (
-  <div className="portal__content">
-    <section className="section">
-      <div className="section__header">
-        <div>
-          <p className="eyebrow">Admin overview</p>
-          <h1>Operations dashboard</h1>
-          <p className="muted">Monitor inventory, orders, and fulfillment health in real time.</p>
-        </div>
-        <button className="btn btn--primary">Create promotion</button>
-      </div>
-      <div className="stats">
-        {[{ label: 'Orders in queue', value: '148' }, { label: 'Fulfillment SLA', value: '97%' }, { label: 'Revenue today', value: '$32.4k' }].map(
-          (stat) => (
-            <div className="stat" key={stat.label}>
-              <p>{stat.label}</p>
-              <h3>{stat.value}</h3>
-            </div>
-          )
-        )}
-      </div>
-    </section>
+import { useEffect, useState } from 'react'
+import { apiRequest } from '../../lib/api'
+import { useAppSelector } from '../../store/hooks'
+import type { Product } from '../../types'
 
-    <section className="section">
-      <h2>Admin Workstreams</h2>
-      <div className="card-grid">
-        {['Inventory health checks', 'Returns approvals', 'Campaign scheduling', 'Fraud review queue'].map((item) => (
-          <article className="card" key={item}>
-            <div className="card__tag card__tag--admin">Admin</div>
-            <h4>{item}</h4>
-            <p className="muted">Role-secured route with audit friendly actions.</p>
-            <button className="btn btn--mini">Open</button>
-          </article>
-        ))}
-      </div>
-    </section>
-  </div>
-)
+const AdminOverview = () => {
+  const token = useAppSelector((state) => state.auth.token)
+  const [pending, setPending] = useState<Product[]>([])
+
+  useEffect(() => {
+    const load = async () => {
+      if (!token) return
+      const result = await apiRequest<{ items: Product[] }>('/products?status=pending', { token, toastOnSuccess: false })
+      setPending(result.data?.items ?? [])
+    }
+    load()
+  }, [token])
+
+  return (
+    <div className="portal__content">
+      <section className="section">
+        <div className="section__header">
+          <div>
+            <p className="eyebrow">Admin overview</p>
+            <h1>Command center</h1>
+            <p className="muted">Review vendor submissions and keep customers informed.</p>
+          </div>
+        </div>
+        <div className="stat-grid">
+          <div className="stat">
+            <h3>{pending.length}</h3>
+            <p className="muted">Pending product approvals</p>
+          </div>
+          <div className="stat">
+            <h3>Live</h3>
+            <p className="muted">Notifications + reviews enabled</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
 
 export default AdminOverview

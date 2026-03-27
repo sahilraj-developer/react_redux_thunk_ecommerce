@@ -5,7 +5,7 @@ import { login } from '../../features/auth/authSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
 const VendorLogin = () => {
-  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const dispatch = useAppDispatch()
   const status = useAppSelector((state) => state.auth.status)
@@ -14,7 +14,7 @@ const VendorLogin = () => {
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    const result = await dispatch(login({ name, role: 'vendor', password }))
+    const result = await dispatch(login({ email, role: 'vendor', password }))
     if (login.fulfilled.match(result)) {
       navigate('/vendor', { replace: true })
     }
@@ -26,12 +26,17 @@ const VendorLogin = () => {
         <div>
           <p className="eyebrow">Vendor access</p>
           <h1>Vendor sign in</h1>
-          <p className="muted">Use password: vendor123</p>
+          <p className="muted">Use email: vendor@shopswift.com · password: vendor123</p>
         </div>
         <form className="auth__form" onSubmit={onSubmit}>
           <label>
-            Business name
-            <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Studio Supply" />
+            Email address
+            <input
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="vendor@shopswift.com"
+              autoComplete="email"
+            />
           </label>
           <label>
             Password

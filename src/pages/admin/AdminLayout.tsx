@@ -14,8 +14,8 @@ const AdminLayout = () => {
           </NavLink>
           <NavLink to="/admin/products">Products</NavLink>
           <NavLink to="/admin/customers">Customers</NavLink>
-          <NavLink to="/admin/sales">Sales</NavLink>
-          <NavLink to="/admin/reports">Reports</NavLink>
+          <NavLink to="/admin/sales">Orders</NavLink>
+          <NavLink to="/admin/reports">Notifications</NavLink>
         </nav>
         <div className="sidebar__card">
           <p className="muted">Security checks enabled</p>

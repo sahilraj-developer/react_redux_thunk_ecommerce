@@ -13,11 +13,11 @@ const VendorLayout = () => {
             Overview
           </NavLink>
           <NavLink to="/vendor/products">Products</NavLink>
-          <NavLink to="/vendor/reports">Reports</NavLink>
+          <NavLink to="/vendor/reports">Notifications</NavLink>
         </nav>
         <div className="sidebar__card">
           <p className="muted">Grow with visibility</p>
-          <p>Upload new SKUs and monitor your sales.</p>
+          <p>Upload new SKUs and track approval feedback.</p>
         </div>
       </aside>
       <section className="portal__main">

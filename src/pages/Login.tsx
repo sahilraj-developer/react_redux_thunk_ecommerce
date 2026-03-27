@@ -5,7 +5,7 @@ import { login } from '../features/auth/authSlice'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 
 const Login = () => {
-  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const dispatch = useAppDispatch()
   const status = useAppSelector((state) => state.auth.status)
@@ -14,7 +14,7 @@ const Login = () => {
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    const result = await dispatch(login({ name, role: 'customer', password }))
+    const result = await dispatch(login({ email, role: 'customer', password }))
     if (login.fulfilled.match(result)) {
       navigate('/', { replace: true })
     }
@@ -26,16 +26,16 @@ const Login = () => {
         <div>
           <p className="eyebrow">Customer access</p>
           <h1>Sign in to shop</h1>
-          <p className="muted">Use any password with 4+ characters.</p>
+          <p className="muted">Use email: customer@shopswift.com · password: customer123</p>
         </div>
         <form className="auth__form" onSubmit={onSubmit}>
           <label>
-            Full name
+            Email address
             <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Avery Singh"
-              autoComplete="name"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="customer@shopswift.com"
+              autoComplete="email"
             />
           </label>
           <label>

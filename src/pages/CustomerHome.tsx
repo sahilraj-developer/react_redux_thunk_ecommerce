@@ -1,73 +1,91 @@
-﻿const CustomerHome = () => {
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import { apiRequest } from '../lib/api'
+import { addToCart } from '../lib/cart'
+import type { Product } from '../types'
+
+const CustomerHome = () => {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const result = await apiRequest<{ items: Product[] }>('/products?status=approved', { toastOnSuccess: false })
+        setProducts(result.data?.items ?? [])
+      } catch {
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
   return (
     <main className="page">
-      <section className="hero">
-        <div className="hero__copy">
-          <p className="eyebrow">Curated drops, same-day shipping</p>
-          <h1>Build a storefront customers actually enjoy.</h1>
+      <section className="hero hero--store">
+        <div>
+          <p className="eyebrow">ShopSwift storefront</p>
+          <h1>Discover products curated by verified vendors.</h1>
           <p className="muted">
-            ShopSwift blends premium product discovery with a secure checkout flow. The customer view focuses on
-            conversion while admin tools keep fulfillment fast.
+            Browse approved listings, check real reviews, and check out in a few clicks.
           </p>
-          <div className="hero__actions">
-            <button className="btn btn--primary">Shop New Arrivals</button>
-            <button className="btn btn--ghost">Track an Order</button>
-          </div>
         </div>
         <div className="hero__panel">
           <div className="panel">
-            <div>
-              <p className="panel__label">Top categories</p>
-              <h3>Urban Tech, Home Rituals, Studio Gear</h3>
-            </div>
-            <div className="panel__stats">
-              <div>
-                <span>24k</span>
-                <p>Daily shoppers</p>
-              </div>
-              <div>
-                <span>4.9</span>
-                <p>Customer rating</p>
-              </div>
-              <div>
-                <span>2 hr</span>
-                <p>Avg. delivery</p>
-              </div>
-            </div>
-          </div>
-          <div className="card-grid">
-            {['Smart Desk Lamp', 'Noise-Zero Headphones', 'Ceramic Brew Set'].map((item) => (
-              <article className="card" key={item}>
-                <div className="card__tag">Featured</div>
-                <h4>{item}</h4>
-                <p className="muted">Limited stock - Express shipping</p>
-                <button className="btn btn--mini">View</button>
-              </article>
-            ))}
+            <p className="panel__label">Live catalog</p>
+            <h3>{products.length} products ready to ship</h3>
+            <p className="muted">Only admin-approved items are visible.</p>
           </div>
         </div>
       </section>
 
       <section className="section">
-        <div>
-          <h2>Customer Experience Layer</h2>
-          <p className="muted">
-            Segmented routes keep the storefront focused while admin routes are locked behind role-based guards.
-          </p>
+        <div className="section__header">
+          <div>
+            <h2>Customer picks</h2>
+            <p className="muted">Tap a product to view details, images, and reviews.</p>
+          </div>
         </div>
-        <div className="feature-grid">
-          {[
-            'Personalized recommendations with Redux state.',
-            'Fast cart interactions using local optimistic updates.',
-            'Promotional surfaces controlled by admin settings.',
-            'Secure checkout placeholders ready for API wiring.',
-          ].map((text) => (
-            <div className="feature" key={text}>
-              <div className="feature__dot" />
-              <p>{text}</p>
-            </div>
-          ))}
-        </div>
+
+        {loading ? (
+          <p className="muted">Loading products...</p>
+        ) : (
+          <div className="card-grid">
+            {products.map((product) => (
+              <article className="card product" key={product._id}>
+                <div className="product__image">
+                  {product.images?.[0] ? (
+                    <img src={product.images[0]} alt={product.name} />
+                  ) : (
+                    <div className="placeholder">No image</div>
+                  )}
+                </div>
+                <div>
+                  <h4>{product.name}</h4>
+                  <p className="muted">{product.description}</p>
+                  <p className="price">${product.price.toFixed(2)}</p>
+                </div>
+                <div className="product__actions">
+                  <Link className="btn btn--mini" to={`/products/${product._id}`}>
+                    View
+                  </Link>
+                  <button
+                    className="btn btn--ghost"
+                    onClick={() => {
+                      addToCart(product)
+                      toast.success('Added to cart')
+                    }}
+                  >
+                    Add to cart
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   )

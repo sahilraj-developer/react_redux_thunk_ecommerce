@@ -3,21 +3,14 @@ const AdminSales = () => (
     <section className="section">
       <div className="section__header">
         <div>
-          <p className="eyebrow">Revenue</p>
-          <h1>Sales performance</h1>
-          <p className="muted">Track sales velocity, conversion rates, and revenue by channel.</p>
+          <p className="eyebrow">Sales cockpit</p>
+          <h1>Orders & revenue</h1>
+          <p className="muted">Customer order data is available to the admin in the next iteration.</p>
         </div>
-        <button className="btn btn--primary">Export report</button>
       </div>
-      <div className="stats">
-        {[{ label: 'Conversion rate', value: '3.8%' }, { label: 'Average order', value: '$128' }, { label: 'New customers', value: '1.2k' }].map(
-          (stat) => (
-            <div className="stat" key={stat.label}>
-              <p>{stat.label}</p>
-              <h3>{stat.value}</h3>
-            </div>
-          )
-        )}
+      <div className="card">
+        <h4>Connected backend</h4>
+        <p className="muted">Orders are stored in MongoDB and notifications are sent to customers.</p>
       </div>
     </section>
   </div>

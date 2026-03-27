@@ -16,6 +16,9 @@ import VendorLogin from './pages/vendor/VendorLogin'
 import VendorOverview from './pages/vendor/VendorOverview'
 import VendorProducts from './pages/vendor/VendorProducts'
 import VendorReports from './pages/vendor/VendorReports'
+import ProductDetails from './pages/ProductDetails'
+import Checkout from './pages/Checkout'
+import Notifications from './pages/Notifications'
 
 const App = () => {
   return (
@@ -23,6 +26,9 @@ const App = () => {
       <NavBar />
       <Routes>
         <Route path="/" element={<CustomerHome />} />
+        <Route path="/products/:id" element={<ProductDetails />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/login" element={<Login />} />
 
         <Route path="/admin/login" element={<AdminLogin />} />

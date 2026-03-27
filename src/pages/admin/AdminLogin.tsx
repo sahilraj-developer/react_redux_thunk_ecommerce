@@ -5,7 +5,7 @@ import { login } from '../../features/auth/authSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 
 const AdminLogin = () => {
-  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const dispatch = useAppDispatch()
   const status = useAppSelector((state) => state.auth.status)
@@ -14,7 +14,7 @@ const AdminLogin = () => {
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    const result = await dispatch(login({ name, role: 'admin', password }))
+    const result = await dispatch(login({ email, role: 'admin', password }))
     if (login.fulfilled.match(result)) {
       navigate('/admin', { replace: true })
     }
@@ -26,12 +26,17 @@ const AdminLogin = () => {
         <div>
           <p className="eyebrow">Admin access</p>
           <h1>Admin sign in</h1>
-          <p className="muted">Use password: admin123</p>
+          <p className="muted">Use email: admin@shopswift.com · password: admin123</p>
         </div>
         <form className="auth__form" onSubmit={onSubmit}>
           <label>
-            Full name
-            <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Admin" />
+            Email address
+            <input
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="admin@shopswift.com"
+              autoComplete="email"
+            />
           </label>
           <label>
             Password

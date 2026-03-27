@@ -1,38 +1,50 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import { apiRequest } from '../../lib/api'
 
 export type UserRole = 'guest' | 'customer' | 'admin' | 'vendor'
 
 export type AuthUser = {
+  id: string
   name: string
   role: UserRole
+  email: string
 }
 
 type AuthState = {
   user: AuthUser | null
+  token: string | null
   status: 'idle' | 'loading' | 'succeeded' | 'failed'
   error: string | null
 }
 
 const STORAGE_KEY = 'shopswift_auth'
+type StoredAuth = {
+  user: AuthUser
+  token: string
+}
 
-const loadStoredUser = (): AuthUser | null => {
+const loadStoredAuth = (): StoredAuth | null => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    return JSON.parse(raw) as AuthUser
+    const parsed = JSON.parse(raw) as StoredAuth
+    if (parsed?.user && parsed?.token) {
+      return parsed
+    }
+    return null
   } catch {
     return null
   }
 }
 
-const saveStoredUser = (user: AuthUser | null) => {
+const saveStoredAuth = (payload: StoredAuth | null) => {
   try {
-    if (!user) {
+    if (!payload) {
       localStorage.removeItem(STORAGE_KEY)
       return
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   } catch {
     // Ignore storage errors (private mode, disabled storage, etc.)
   }
@@ -40,30 +52,22 @@ const saveStoredUser = (user: AuthUser | null) => {
 
 export const login = createAsyncThunk(
   'auth/login',
-  async (payload: { name: string; role: UserRole; password: string }) => {
-    await new Promise((resolve) => setTimeout(resolve, 650))
+  async (payload: { email: string; role: UserRole; password: string }) => {
+    const data = await apiRequest<{ user: AuthUser; token: string }>('/auth/login', {
+      method: 'POST',
+      body: payload,
+      toastOnSuccess: true,
+    })
 
-    if (payload.password.trim().length < 4) {
-      throw new Error('Password must be at least 4 characters')
-    }
-
-    if (payload.role === 'admin' && payload.password !== 'admin123') {
-      throw new Error('Invalid admin credentials')
-    }
-
-    if (payload.role === 'vendor' && payload.password !== 'vendor123') {
-      throw new Error('Invalid vendor credentials')
-    }
-
-    return {
-      name: payload.name || (payload.role === 'admin' ? 'Admin User' : payload.role === 'vendor' ? 'Vendor' : 'Customer'),
-      role: payload.role,
-    } as AuthUser
+    return data.data as { user: AuthUser; token: string }
   }
 )
 
+const storedAuth = loadStoredAuth()
+
 const initialState: AuthState = {
-  user: loadStoredUser(),
+  user: storedAuth?.user ?? null,
+  token: storedAuth?.token ?? null,
   status: 'idle',
   error: null,
 }
@@ -74,13 +78,19 @@ const authSlice = createSlice({
   reducers: {
     logout(state) {
       state.user = null
+      state.token = null
       state.status = 'idle'
       state.error = null
-      saveStoredUser(null)
+      saveStoredAuth(null)
     },
-    setUser(state, action: PayloadAction<AuthUser | null>) {
-      state.user = action.payload
-      saveStoredUser(action.payload)
+    setUser(state, action: PayloadAction<{ user: AuthUser | null; token?: string | null }>) {
+      state.user = action.payload.user
+      state.token = action.payload.token ?? null
+      if (action.payload.user && action.payload.token) {
+        saveStoredAuth({ user: action.payload.user, token: action.payload.token })
+      } else {
+        saveStoredAuth(null)
+      }
     },
   },
   extraReducers: (builder) => {
@@ -91,8 +101,9 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'succeeded'
-        state.user = action.payload
-        saveStoredUser(action.payload)
+        state.user = action.payload.user
+        state.token = action.payload.token
+        saveStoredAuth({ user: action.payload.user, token: action.payload.token })
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed'
