@@ -1,0 +1,51 @@
+# Frontend deployment + service
+# Replace `YOUR_REGISTRY/shopswift-frontend:latest` with your image
+# If using an ingress controller, expose via Ingress instead of LoadBalancer
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopswift-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shopswift-frontend
+  template:
+    metadata:
+      labels:
+        app: shopswift-frontend
+    spec:
+      containers:
+        - name: web
+          image: YOUR_REGISTRY/shopswift-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+            # Frontend is static; VITE_API_URL is baked at build time.
+            # Use ingress or reverse-proxy for /api routing if needed.
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shopswift-frontend
+spec:
+  selector:
+    app: shopswift-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
